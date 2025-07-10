@@ -5,10 +5,12 @@ public class BuildManager : MonoBehaviour
 {
     public static BuildManager Instance;
 
-    public Tilemap buildTilemap;
+    public Tilemap buildTilemap;          // Tilemap pre stavbu
+    public Tilemap previewTilemap;        // Tilemap pre preview (v inej vrstve)
     public TileBase wallTile;
 
     private TileBase selectedTile;
+    private Vector3Int lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private void Awake()
     {
@@ -19,6 +21,7 @@ public class BuildManager : MonoBehaviour
     void Update()
     {
         HandleTileSelection();
+        UpdatePreview();
         HandleTilePlacement();
     }
 
@@ -27,6 +30,34 @@ public class BuildManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             selectedTile = wallTile;
             Debug.Log("Selected tile: Wall");
+        }
+    }
+
+    private void UpdatePreview()
+    {
+        if (selectedTile == null)
+        {
+            ClearPreview();
+            return;
+        }
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPos = buildTilemap.WorldToCell(mouseWorldPos);
+
+        if (cellPos != lastPreviewPos)
+        {
+            ClearPreview();
+            previewTilemap.SetTile(cellPos, selectedTile);
+            lastPreviewPos = cellPos;
+        }
+    }
+
+    private void ClearPreview()
+    {
+        if (lastPreviewPos != new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+        {
+            previewTilemap.SetTile(lastPreviewPos, null);
+            lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         }
     }
 
