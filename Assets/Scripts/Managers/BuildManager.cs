@@ -7,9 +7,8 @@ public class BuildManager : MonoBehaviour
 
     public Tilemap buildTilemap;          // Tilemap pre stavbu
     public Tilemap previewTilemap;        // Tilemap pre preview (v inej vrstve)
-    public TileBase wallTile;
-
-    private TileBase selectedTile;
+    public RuleTile wallTile;
+    private RuleTile selectedTile;
     private Vector3Int lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private void Awake()
