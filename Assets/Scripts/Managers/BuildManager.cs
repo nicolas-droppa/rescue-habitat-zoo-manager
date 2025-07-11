@@ -30,6 +30,12 @@ public class BuildManager : MonoBehaviour
             selectedTile = wallTile;
             Debug.Log("Selected tile: Wall");
         }
+        
+        if (Input.GetKeyDown(KeyCode.Alpha0)) {
+            selectedTile = null;
+            ClearPreview();
+            Debug.Log("Deselected tile");
+        }
     }
 
     private void UpdatePreview()
