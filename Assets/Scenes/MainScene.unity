@@ -352,7 +352,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildTilemap: {fileID: 1969382842}
   previewTilemap: {fileID: 845095868}
-  wallTile: {fileID: 11400000, guid: 2532c1648115477439fe4ee9072379f6, type: 2}
+  wallTile: {fileID: 11400000, guid: d32e3341ab6b4324db5b217f73bf9736, type: 2}
 --- !u!4 &1826643242
 Transform:
   m_ObjectHideFlags: 0
