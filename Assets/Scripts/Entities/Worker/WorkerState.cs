@@ -1,4 +1,4 @@
-public abstract class WorkerState
+public class WorkerState
 {
     protected Worker worker;
 
