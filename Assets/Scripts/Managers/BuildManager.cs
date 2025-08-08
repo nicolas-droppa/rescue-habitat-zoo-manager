@@ -66,12 +66,27 @@ public class BuildManager : MonoBehaviour
         }
     }
 
+    private Vector3Int lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
     private void HandleTilePlacement()
     {
-        if (Input.GetMouseButtonDown(0) && selectedTile != null) {
+        if (selectedTile == null) return;
+
+        if (Input.GetMouseButton(0))
+        {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = buildTilemap.WorldToCell(mouseWorldPos);
-            buildTilemap.SetTile(cellPos, selectedTile);
+
+            if (cellPos != lastPlacedTilePos)
+            {
+                buildTilemap.SetTile(cellPos, selectedTile);
+                lastPlacedTilePos = cellPos;
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         }
     }
 }
