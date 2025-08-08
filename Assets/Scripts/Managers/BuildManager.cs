@@ -66,26 +66,61 @@ public class BuildManager : MonoBehaviour
         }
     }
 
+    private Vector3Int dragStartCellPos;
+    private bool isDragging = false;
+    private bool dragDirectionLocked = false;
+    private bool lockVertical = false; // true = vertical, false = horizontal
     private Vector3Int lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private void HandleTilePlacement()
     {
         if (selectedTile == null) return;
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3Int cellPos = buildTilemap.WorldToCell(mouseWorldPos);
+            dragStartCellPos = buildTilemap.WorldToCell(mouseWorldPos);
+            lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            isDragging = true;
+            dragDirectionLocked = false;
+        }
 
-            if (cellPos != lastPlacedTilePos)
+        if (Input.GetMouseButton(0) && isDragging)
+        {
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int currentCellPos = buildTilemap.WorldToCell(mouseWorldPos);
+
+            if (!dragDirectionLocked && currentCellPos != dragStartCellPos)
             {
-                buildTilemap.SetTile(cellPos, selectedTile);
-                lastPlacedTilePos = cellPos;
+                int dx = Mathf.Abs(currentCellPos.x - dragStartCellPos.x);
+                int dy = Mathf.Abs(currentCellPos.y - dragStartCellPos.y);
+
+                lockVertical = dy >= dx;
+                dragDirectionLocked = true;
+            }
+
+        
+            Vector3Int lockedCellPos = currentCellPos;
+
+            if (dragDirectionLocked)
+            {
+                if (lockVertical)
+                    lockedCellPos.x = dragStartCellPos.x; // iba Y sa mení
+                else
+                    lockedCellPos.y = dragStartCellPos.y; // iba X sa mení
+            }
+
+            if (lockedCellPos != lastPlacedTilePos)
+            {
+                buildTilemap.SetTile(lockedCellPos, selectedTile);
+                lastPlacedTilePos = lockedCellPos;
             }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
+            isDragging = false;
+            dragDirectionLocked = false;
             lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         }
     }
