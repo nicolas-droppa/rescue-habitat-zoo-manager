@@ -1,15 +1,24 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+private enum BuildMode
+{
+    None,
+    Build,
+    Destroy
+}
+
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager Instance;
 
-    public Tilemap buildTilemap;          // Tilemap pre stavbu
-    public Tilemap previewTilemap;        // Tilemap pre preview (v inej vrstve)
+    public Tilemap buildTilemap;
+    public Tilemap previewTilemap;
     public RuleTile wallTile;
     private RuleTile selectedTile;
     private Vector3Int lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
+    private BuildMode currentMode = BuildMode.None;
 
     private void Awake()
     {
@@ -105,9 +114,9 @@ public class BuildManager : MonoBehaviour
             if (dragDirectionLocked)
             {
                 if (lockVertical)
-                    lockedCellPos.x = dragStartCellPos.x; // iba Y sa mení
+                    lockedCellPos.x = dragStartCellPos.x;
                 else
-                    lockedCellPos.y = dragStartCellPos.y; // iba X sa mení
+                    lockedCellPos.y = dragStartCellPos.y;
             }
 
             if (lockedCellPos != lastPlacedTilePos)
