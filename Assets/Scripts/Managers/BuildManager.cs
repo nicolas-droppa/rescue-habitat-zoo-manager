@@ -26,6 +26,23 @@ public class BuildManager : MonoBehaviour
         else Instance = this;
     }
 
+    public void SelectBuildItem(BuildItem item)
+    {
+        if (item == null)
+        {
+            currentMode = BuildMode.None;
+            selectedTile = null;
+            ClearPreview();
+            Debug.Log("Deselected build item");
+        }
+        else
+        {
+            currentMode = BuildMode.Build;
+            selectedTile = item.tile;
+            Debug.Log($"Selected: {item.itemName}");
+        }
+    }
+
     void Update()
     {
         HandleTileSelection();

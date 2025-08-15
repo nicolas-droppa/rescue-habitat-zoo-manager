@@ -3108,6 +3108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1533601755}
   - component: {fileID: 1533601756}
+  - component: {fileID: 1533601757}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -3147,6 +3148,28 @@ MonoBehaviour:
   buttonPlay: {fileID: 1733667572}
   buttonFast: {fileID: 878725288}
   buttonUltra: {fileID: 943703612}
+--- !u!114 &1533601757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533601753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5b333db001be7a41a1a8a31f34b7a5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  middleGrid: {fileID: 0}
+  buttonPrefab: {fileID: 0}
+  foundations: []
+  walls: []
+  grounds: []
+  doors: []
+  objects: []
+  water: []
+  electricity: []
+  animals: []
 --- !u!1 &1571219461
 GameObject:
   m_ObjectHideFlags: 0
