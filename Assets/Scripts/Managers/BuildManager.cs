@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-private enum BuildMode
+public enum BuildMode
 {
     None,
     Build,
@@ -35,21 +35,32 @@ public class BuildManager : MonoBehaviour
 
     private void HandleTileSelection()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentMode = BuildMode.Build;
             selectedTile = wallTile;
-            Debug.Log("Selected tile: Wall");
+            Debug.Log("Mode: Build (Wall)");
         }
-        
-        if (Input.GetKeyDown(KeyCode.Alpha0)) {
+
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            currentMode = BuildMode.Destroy;
+            selectedTile = null;
+            Debug.Log("Mode: Destroy");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            currentMode = BuildMode.None;
             selectedTile = null;
             ClearPreview();
-            Debug.Log("Deselected tile");
+            Debug.Log("Mode: None");
         }
     }
 
     private void UpdatePreview()
     {
-        if (selectedTile == null)
+        if (currentMode == BuildMode.None)
         {
             ClearPreview();
             return;
@@ -61,10 +72,19 @@ public class BuildManager : MonoBehaviour
         if (cellPos != lastPreviewPos)
         {
             ClearPreview();
-            previewTilemap.SetTile(cellPos, selectedTile);
+
+            if (currentMode == BuildMode.Build && selectedTile != null)
+                previewTilemap.SetTile(cellPos, selectedTile);
+            else if (currentMode == BuildMode.Destroy) {
+                // custom destroy preview tile to be implemented
+                if (buildTilemap.HasTile(cellPos))
+                    previewTilemap.SetTile(cellPos, selectedTile);
+            }
+
             lastPreviewPos = cellPos;
         }
     }
+
 
     private void ClearPreview()
     {
@@ -78,12 +98,12 @@ public class BuildManager : MonoBehaviour
     private Vector3Int dragStartCellPos;
     private bool isDragging = false;
     private bool dragDirectionLocked = false;
-    private bool lockVertical = false; // true = vertical, false = horizontal
+    private bool lockVertical = false;
     private Vector3Int lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private void HandleTilePlacement()
     {
-        if (selectedTile == null) return;
+        if (currentMode == BuildMode.None) return;
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -99,30 +119,38 @@ public class BuildManager : MonoBehaviour
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int currentCellPos = buildTilemap.WorldToCell(mouseWorldPos);
 
-            if (!dragDirectionLocked && currentCellPos != dragStartCellPos)
+            if (currentMode == BuildMode.Build)
             {
-                int dx = Mathf.Abs(currentCellPos.x - dragStartCellPos.x);
-                int dy = Mathf.Abs(currentCellPos.y - dragStartCellPos.y);
+                if (!dragDirectionLocked && currentCellPos != dragStartCellPos)
+                {
+                    int dx = Mathf.Abs(currentCellPos.x - dragStartCellPos.x);
+                    int dy = Mathf.Abs(currentCellPos.y - dragStartCellPos.y);
+                    lockVertical = dy >= dx;
+                    dragDirectionLocked = true;
+                }
 
-                lockVertical = dy >= dx;
-                dragDirectionLocked = true;
+                Vector3Int lockedCellPos = currentCellPos;
+                if (dragDirectionLocked)
+                {
+                    if (lockVertical)
+                        lockedCellPos.x = dragStartCellPos.x;
+                    else
+                        lockedCellPos.y = dragStartCellPos.y;
+                }
+
+                if (lockedCellPos != lastPlacedTilePos)
+                {
+                    buildTilemap.SetTile(lockedCellPos, selectedTile);
+                    lastPlacedTilePos = lockedCellPos;
+                }
             }
-
-        
-            Vector3Int lockedCellPos = currentCellPos;
-
-            if (dragDirectionLocked)
+            else if (currentMode == BuildMode.Destroy)
             {
-                if (lockVertical)
-                    lockedCellPos.x = dragStartCellPos.x;
-                else
-                    lockedCellPos.y = dragStartCellPos.y;
-            }
-
-            if (lockedCellPos != lastPlacedTilePos)
-            {
-                buildTilemap.SetTile(lockedCellPos, selectedTile);
-                lastPlacedTilePos = lockedCellPos;
+                if (currentCellPos != lastPlacedTilePos)
+                {
+                    buildTilemap.SetTile(currentCellPos, null);
+                    lastPlacedTilePos = currentCellPos;
+                }
             }
         }
 
