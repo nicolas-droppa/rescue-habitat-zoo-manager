@@ -2,13 +2,21 @@ using UnityEngine;
 
 public class BuildMenuController : MonoBehaviour
 {
-    public GameObject buildMenu;
+    public GameObject menuRoot;
+
+    private bool isOpen = false;
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            buildMenu.SetActive(!buildMenu.activeSelf);
+            ToggleMenu();
         }
+    }
+
+    public void ToggleMenu()
+    {
+        isOpen = !isOpen;
+        menuRoot.SetActive(isOpen);
     }
 }

@@ -45,10 +45,14 @@ public class BuildManager : MonoBehaviour
 
     void Update()
     {
+        /*if (BuildMenuController.Instance != null && BuildMenuController.Instance.IsOpen)
+            return; // ignore input when menu open*/
+
         HandleTileSelection();
         UpdatePreview();
         HandleTilePlacement();
     }
+
 
     private void HandleTileSelection()
     {
