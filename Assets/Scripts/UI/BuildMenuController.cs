@@ -3,8 +3,12 @@ using UnityEngine;
 public class BuildMenuController : MonoBehaviour
 {
     public GameObject menuRoot;
+    private bool isOpen;
 
-    private bool isOpen = false;
+    void Start()
+    {
+        isOpen = menuRoot.activeSelf;
+    }
 
     void Update()
     {
@@ -14,7 +18,7 @@ public class BuildMenuController : MonoBehaviour
         }
     }
 
-    public void ToggleMenu()
+    void ToggleMenu()
     {
         isOpen = !isOpen;
         menuRoot.SetActive(isOpen);
