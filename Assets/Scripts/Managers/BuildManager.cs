@@ -17,7 +17,6 @@ public class BuildManager : MonoBehaviour
     public Tilemap previewTilemap;
     public RuleTile wallTile;
     private RuleTile selectedTile;
-    private Vector3Int lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private BuildMode currentMode = BuildMode.None;
 
@@ -47,8 +46,7 @@ public class BuildManager : MonoBehaviour
     void Update()
     {
         HandleTileSelection();
-        UpdatePreview();
-        HandleTilePlacement();
+        HandleTilePlacement(); // už NEVOLÁ UpdatePreview()
     }
 
     private void HandleTileSelection()
@@ -73,33 +71,6 @@ public class BuildManager : MonoBehaviour
             selectedTile = null;
             ClearPreview();
             Debug.Log("Mode: None");
-        }
-    }
-
-    private void UpdatePreview()
-    {
-        if (currentMode == BuildMode.None)
-        {
-            ClearPreview();
-            return;
-        }
-
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3Int cellPos = buildTilemap.WorldToCell(mouseWorldPos);
-
-        if (cellPos != lastPreviewPos)
-        {
-            ClearPreview();
-
-            if (currentMode == BuildMode.Build && selectedTile != null)
-                previewTilemap.SetTile(cellPos, selectedTile);
-            else if (currentMode == BuildMode.Destroy)
-            {
-                if (buildTilemap.HasTile(cellPos))
-                    previewTilemap.SetTile(cellPos, selectedTile);
-            }
-
-            lastPreviewPos = cellPos;
         }
     }
 
