@@ -46,7 +46,7 @@ public class BuildManager : MonoBehaviour
     void Update()
     {
         HandleTileSelection();
-        HandleTilePlacement(); // už NEVOLÁ UpdatePreview()
+        HandleTilePlacement();
     }
 
     private void HandleTileSelection()
@@ -74,7 +74,6 @@ public class BuildManager : MonoBehaviour
         }
     }
 
-    // tu ukladáme všetky preview tiles, aby sme ich vedeli zmazať
     private List<Vector3Int> currentPreviewTiles = new List<Vector3Int>();
 
     private void ClearPreview()
@@ -176,16 +175,31 @@ public class BuildManager : MonoBehaviour
         int minY = Mathf.Min(start.y, end.y);
         int maxY = Mathf.Max(start.y, end.y);
 
-        for (int x = minX; x <= maxX; x++)
+        if (currentMode == BuildMode.Build)
         {
-            buildTilemap.SetTile(new Vector3Int(x, minY, 0), tile);
-            buildTilemap.SetTile(new Vector3Int(x, maxY, 0), tile);
-        }
+            // build mode -- only edge
+            for (int x = minX; x <= maxX; x++)
+            {
+                buildTilemap.SetTile(new Vector3Int(x, minY, 0), tile);
+                buildTilemap.SetTile(new Vector3Int(x, maxY, 0), tile);
+            }
 
-        for (int y = minY; y <= maxY; y++)
+            for (int y = minY; y <= maxY; y++)
+            {
+                buildTilemap.SetTile(new Vector3Int(minX, y, 0), tile);
+                buildTilemap.SetTile(new Vector3Int(maxX, y, 0), tile);
+            }
+        }
+        else if (currentMode == BuildMode.Destroy)
         {
-            buildTilemap.SetTile(new Vector3Int(minX, y, 0), tile);
-            buildTilemap.SetTile(new Vector3Int(maxX, y, 0), tile);
+            // destroy mode -- whole area
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    buildTilemap.SetTile(new Vector3Int(x, y, 0), null);
+                }
+            }
         }
     }
 }
