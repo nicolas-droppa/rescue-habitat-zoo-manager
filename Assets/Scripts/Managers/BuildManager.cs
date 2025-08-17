@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
 
 public enum BuildMode
 {
@@ -45,14 +46,10 @@ public class BuildManager : MonoBehaviour
 
     void Update()
     {
-        /*if (BuildMenuController.Instance != null && BuildMenuController.Instance.IsOpen)
-            return; // ignore input when menu open*/
-
         HandleTileSelection();
         UpdatePreview();
         HandleTilePlacement();
     }
-
 
     private void HandleTileSelection()
     {
@@ -96,8 +93,8 @@ public class BuildManager : MonoBehaviour
 
             if (currentMode == BuildMode.Build && selectedTile != null)
                 previewTilemap.SetTile(cellPos, selectedTile);
-            else if (currentMode == BuildMode.Destroy) {
-                // custom destroy preview tile to be implemented
+            else if (currentMode == BuildMode.Destroy)
+            {
                 if (buildTilemap.HasTile(cellPos))
                     previewTilemap.SetTile(cellPos, selectedTile);
             }
@@ -106,21 +103,20 @@ public class BuildManager : MonoBehaviour
         }
     }
 
+    // tu ukladáme všetky preview tiles, aby sme ich vedeli zmazať
+    private List<Vector3Int> currentPreviewTiles = new List<Vector3Int>();
 
     private void ClearPreview()
     {
-        if (lastPreviewPos != new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+        foreach (var pos in currentPreviewTiles)
         {
-            previewTilemap.SetTile(lastPreviewPos, null);
-            lastPreviewPos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            previewTilemap.SetTile(pos, null);
         }
+        currentPreviewTiles.Clear();
     }
 
     private Vector3Int dragStartCellPos;
     private bool isDragging = false;
-    private bool dragDirectionLocked = false;
-    private bool lockVertical = false;
-    private Vector3Int lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private void HandleTilePlacement()
     {
@@ -130,9 +126,8 @@ public class BuildManager : MonoBehaviour
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             dragStartCellPos = buildTilemap.WorldToCell(mouseWorldPos);
-            lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
             isDragging = true;
-            dragDirectionLocked = false;
+            ClearPreview();
         }
 
         if (Input.GetMouseButton(0) && isDragging)
@@ -140,46 +135,86 @@ public class BuildManager : MonoBehaviour
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int currentCellPos = buildTilemap.WorldToCell(mouseWorldPos);
 
-            if (currentMode == BuildMode.Build)
+            if (currentMode == BuildMode.Build && selectedTile != null)
             {
-                if (!dragDirectionLocked && currentCellPos != dragStartCellPos)
-                {
-                    int dx = Mathf.Abs(currentCellPos.x - dragStartCellPos.x);
-                    int dy = Mathf.Abs(currentCellPos.y - dragStartCellPos.y);
-                    lockVertical = dy >= dx;
-                    dragDirectionLocked = true;
-                }
-
-                Vector3Int lockedCellPos = currentCellPos;
-                if (dragDirectionLocked)
-                {
-                    if (lockVertical)
-                        lockedCellPos.x = dragStartCellPos.x;
-                    else
-                        lockedCellPos.y = dragStartCellPos.y;
-                }
-
-                if (lockedCellPos != lastPlacedTilePos)
-                {
-                    buildTilemap.SetTile(lockedCellPos, selectedTile);
-                    lastPlacedTilePos = lockedCellPos;
-                }
+                ClearPreview();
+                DrawRectanglePreview(dragStartCellPos, currentCellPos);
             }
             else if (currentMode == BuildMode.Destroy)
             {
-                if (currentCellPos != lastPlacedTilePos)
-                {
-                    buildTilemap.SetTile(currentCellPos, null);
-                    lastPlacedTilePos = currentCellPos;
-                }
+                ClearPreview();
+                DrawRectanglePreview(dragStartCellPos, currentCellPos, destroyMode: true);
             }
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && isDragging)
         {
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int endCellPos = buildTilemap.WorldToCell(mouseWorldPos);
+
+            if (currentMode == BuildMode.Build && selectedTile != null)
+            {
+                ApplyRectangle(dragStartCellPos, endCellPos, selectedTile);
+            }
+            else if (currentMode == BuildMode.Destroy)
+            {
+                ApplyRectangle(dragStartCellPos, endCellPos, null);
+            }
+
+            ClearPreview();
             isDragging = false;
-            dragDirectionLocked = false;
-            lastPlacedTilePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+        }
+    }
+
+    private void DrawRectanglePreview(Vector3Int start, Vector3Int end, bool destroyMode = false)
+    {
+        int minX = Mathf.Min(start.x, end.x);
+        int maxX = Mathf.Max(start.x, end.x);
+        int minY = Mathf.Min(start.y, end.y);
+        int maxY = Mathf.Max(start.y, end.y);
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            Vector3Int pos1 = new Vector3Int(x, minY, 0);
+            Vector3Int pos2 = new Vector3Int(x, maxY, 0);
+
+            previewTilemap.SetTile(pos1, destroyMode ? null : selectedTile);
+            previewTilemap.SetTile(pos2, destroyMode ? null : selectedTile);
+
+            currentPreviewTiles.Add(pos1);
+            currentPreviewTiles.Add(pos2);
+        }
+
+        for (int y = minY; y <= maxY; y++)
+        {
+            Vector3Int pos1 = new Vector3Int(minX, y, 0);
+            Vector3Int pos2 = new Vector3Int(maxX, y, 0);
+
+            previewTilemap.SetTile(pos1, destroyMode ? null : selectedTile);
+            previewTilemap.SetTile(pos2, destroyMode ? null : selectedTile);
+
+            currentPreviewTiles.Add(pos1);
+            currentPreviewTiles.Add(pos2);
+        }
+    }
+
+    private void ApplyRectangle(Vector3Int start, Vector3Int end, TileBase tile)
+    {
+        int minX = Mathf.Min(start.x, end.x);
+        int maxX = Mathf.Max(start.x, end.x);
+        int minY = Mathf.Min(start.y, end.y);
+        int maxY = Mathf.Max(start.y, end.y);
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            buildTilemap.SetTile(new Vector3Int(x, minY, 0), tile);
+            buildTilemap.SetTile(new Vector3Int(x, maxY, 0), tile);
+        }
+
+        for (int y = minY; y <= maxY; y++)
+        {
+            buildTilemap.SetTile(new Vector3Int(minX, y, 0), tile);
+            buildTilemap.SetTile(new Vector3Int(maxX, y, 0), tile);
         }
     }
 }
