@@ -143,28 +143,49 @@ public class BuildManager : MonoBehaviour
         int minY = Mathf.Min(start.y, end.y);
         int maxY = Mathf.Max(start.y, end.y);
 
-        for (int x = minX; x <= maxX; x++)
+        if (destroyMode)
         {
-            Vector3Int pos1 = new Vector3Int(x, minY, 0);
-            Vector3Int pos2 = new Vector3Int(x, maxY, 0);
-
-            previewTilemap.SetTile(pos1, destroyMode ? null : selectedTile);
-            previewTilemap.SetTile(pos2, destroyMode ? null : selectedTile);
-
-            currentPreviewTiles.Add(pos1);
-            currentPreviewTiles.Add(pos2);
+            // destroy mode --red overlay
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    Vector3Int pos = new Vector3Int(x, y, 0);
+                    TileBase targetTile = buildTilemap.GetTile(pos);
+                    if (targetTile != null)
+                    {
+                        previewTilemap.SetTile(pos, targetTile);
+                        previewTilemap.SetColor(pos, new Color(1f, 0f, 0f, 0.5f));
+                        currentPreviewTiles.Add(pos);
+                    }
+                }
+            }
         }
-
-        for (int y = minY; y <= maxY; y++)
+        else
         {
-            Vector3Int pos1 = new Vector3Int(minX, y, 0);
-            Vector3Int pos2 = new Vector3Int(maxX, y, 0);
+            for (int x = minX; x <= maxX; x++)
+            {
+                Vector3Int pos1 = new Vector3Int(x, minY, 0);
+                Vector3Int pos2 = new Vector3Int(x, maxY, 0);
 
-            previewTilemap.SetTile(pos1, destroyMode ? null : selectedTile);
-            previewTilemap.SetTile(pos2, destroyMode ? null : selectedTile);
+                previewTilemap.SetTile(pos1, selectedTile);
+                previewTilemap.SetTile(pos2, selectedTile);
 
-            currentPreviewTiles.Add(pos1);
-            currentPreviewTiles.Add(pos2);
+                currentPreviewTiles.Add(pos1);
+                currentPreviewTiles.Add(pos2);
+            }
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                Vector3Int pos1 = new Vector3Int(minX, y, 0);
+                Vector3Int pos2 = new Vector3Int(maxX, y, 0);
+
+                previewTilemap.SetTile(pos1, selectedTile);
+                previewTilemap.SetTile(pos2, selectedTile);
+
+                currentPreviewTiles.Add(pos1);
+                currentPreviewTiles.Add(pos2);
+            }
         }
     }
 
