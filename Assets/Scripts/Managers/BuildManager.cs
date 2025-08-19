@@ -47,6 +47,7 @@ public class BuildManager : MonoBehaviour
     {
         HandleTileSelection();
         HandleTilePlacement();
+        HandleSingleCellPreview();
     }
 
     private void HandleTileSelection()
@@ -73,6 +74,34 @@ public class BuildManager : MonoBehaviour
             Debug.Log("Mode: None");
         }
     }
+
+    private void HandleSingleCellPreview()
+    {
+        if (currentMode == BuildMode.None || isDragging) return;
+
+        ClearPreview();
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPos = buildTilemap.WorldToCell(mouseWorldPos);
+
+        if (currentMode == BuildMode.Build && selectedTile != null)
+        {
+            previewTilemap.SetTile(cellPos, selectedTile);
+            previewTilemap.SetColor(cellPos, new Color(1f, 1f, 1f, 0.5f));
+            currentPreviewTiles.Add(cellPos);
+        }
+        else if (currentMode == BuildMode.Destroy)
+        {
+            TileBase targetTile = buildTilemap.GetTile(cellPos);
+            if (targetTile != null)
+            {
+                previewTilemap.SetTile(cellPos, targetTile);
+                previewTilemap.SetColor(cellPos, new Color(1f, 0f, 0f, 0.5f));
+                currentPreviewTiles.Add(cellPos);
+            }
+        }
+    }
+
 
     private List<Vector3Int> currentPreviewTiles = new List<Vector3Int>();
 
