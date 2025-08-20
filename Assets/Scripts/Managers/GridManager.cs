@@ -88,4 +88,36 @@ public class GridManager : MonoBehaviour
         worldPath.Reverse();
         return worldPath;
     }
+
+    public Vector3Int FindNearestWalkableCell(Vector3Int origin, int maxSearchDistance = 5)
+    {
+        // BFS search for nearest walkable cell
+        Queue<Vector3Int> frontier = new Queue<Vector3Int>();
+        HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
+
+        frontier.Enqueue(origin);
+        visited.Add(origin);
+
+        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        while (frontier.Count > 0)
+        {
+            Vector3Int current = frontier.Dequeue();
+
+            if (IsWalkable(current)) return current;
+
+            foreach (var dir in directions)
+            {
+                Vector3Int next = current + dir;
+                if (!visited.Contains(next) && Vector3Int.Distance(origin, next) <= maxSearchDistance)
+                {
+                    frontier.Enqueue(next);
+                    visited.Add(next);
+                }
+            }
+        }
+
+        // If no walkable cell found, return original (will cause idle)
+        return origin;
+    }
 }

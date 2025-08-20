@@ -9,7 +9,6 @@ public class Worker : MonoBehaviour
     public Job currentJob;
     public Vector3 targetWorldPos;
 
-    // Path from GridManager
     public List<Vector3> path;
     private int pathIndex = 0;
 
@@ -34,10 +33,17 @@ public class Worker : MonoBehaviour
     {
         currentJob = job;
 
-        // Find path using GridManager
+        // Convert positions to grid cells
         Vector3Int startCell = GridManager.Instance.WorldToCell(transform.position);
         Vector3Int endCell = job.targetPosition;
 
+        // Ensure target is walkable, otherwise find nearest walkable
+        if (!GridManager.Instance.IsWalkable(endCell))
+        {
+            endCell = GridManager.Instance.FindNearestWalkableCell(endCell);
+        }
+
+        // Get path
         path = GridManager.Instance.FindPath(startCell, endCell);
         pathIndex = 0;
 
@@ -48,6 +54,7 @@ public class Worker : MonoBehaviour
             return;
         }
 
+        // Set first waypoint
         targetWorldPos = path[pathIndex];
         ChangeState(new WorkerStateWalkTo(this));
     }
@@ -71,7 +78,8 @@ public class Worker : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, targetWorldPos) < 0.1f)
+        // Slightly larger threshold to avoid stutter
+        if (Vector3.Distance(transform.position, targetWorldPos) < 0.2f)
         {
             pathIndex++;
             if (pathIndex < path.Count)
@@ -80,7 +88,6 @@ public class Worker : MonoBehaviour
             }
             else
             {
-                // Reached final destination
                 OnArrivedAtJob();
             }
         }

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class WorkerStateWalkTo : WorkerState
 {
     public WorkerStateWalkTo(Worker worker) : base(worker) { }
