@@ -76,7 +76,9 @@ public class Worker : MonoBehaviour
         if (path == null || pathIndex >= path.Count)
             return;
 
-        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
+        float deltaTime = Time.deltaTime * TimeManager.Instance.timeMultiplier;
+
+        transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * deltaTime);
 
         // Slightly larger threshold to avoid stutter
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.2f)
