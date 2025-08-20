@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Worker : MonoBehaviour
@@ -7,6 +8,10 @@ public class Worker : MonoBehaviour
     public float moveSpeed = 2f;
     public Job currentJob;
     public Vector3 targetWorldPos;
+
+    // Path from GridManager
+    public List<Vector3> path;
+    private int pathIndex = 0;
 
     void Start()
     {
@@ -28,7 +33,22 @@ public class Worker : MonoBehaviour
     public void SetJob(Job job)
     {
         currentJob = job;
-        targetWorldPos = TileToWorld(job.targetPosition);
+
+        // Find path using GridManager
+        Vector3Int startCell = GridManager.Instance.WorldToCell(transform.position);
+        Vector3Int endCell = job.targetPosition;
+
+        path = GridManager.Instance.FindPath(startCell, endCell);
+        pathIndex = 0;
+
+        if (path == null || path.Count == 0)
+        {
+            Debug.Log("No path to job!");
+            ChangeState(new WorkerStateIdle(this));
+            return;
+        }
+
+        targetWorldPos = path[pathIndex];
         ChangeState(new WorkerStateWalkTo(this));
     }
 
@@ -44,30 +64,25 @@ public class Worker : MonoBehaviour
         ChangeState(new WorkerStateIdle(this));
     }
 
-    public void MoveTowardsTarget()
+    public void MoveAlongPath()
     {
+        if (path == null || pathIndex >= path.Count)
+            return;
+
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * Time.deltaTime);
-    }
 
-    public bool IsAtTarget()
-    {
-        return Vector3.Distance(transform.position, targetWorldPos) < 0.1f;
-    }
-
-    public Vector3 TileToWorld(Vector3Int tilePos)
-    {
-        if (GridManager.Instance == null)
+        if (Vector3.Distance(transform.position, targetWorldPos) < 0.1f)
         {
-            Debug.LogError("GridManager.Instance is null!");
-            return transform.position; // fallback to current position
+            pathIndex++;
+            if (pathIndex < path.Count)
+            {
+                targetWorldPos = path[pathIndex];
+            }
+            else
+            {
+                // Reached final destination
+                OnArrivedAtJob();
+            }
         }
-
-        if (GridManager.Instance.grid == null)
-        {
-            Debug.LogError("GridManager.Instance.grid is null!");
-            return transform.position;
-        }
-
-        return GridManager.Instance.grid.CellToWorld(tilePos) + new Vector3(0.5f, 0.5f);
     }
 }

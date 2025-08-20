@@ -6,7 +6,7 @@ public class WorkerStateWalkTo : WorkerState
 
     public override void Update()
     {
-        worker.MoveTowardsTarget();
+        worker.MoveAlongPath();
 
         if (worker.IsAtTarget())
         {

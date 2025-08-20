@@ -230,14 +230,26 @@ public class BuildManager : MonoBehaviour
             // build mode -- only edge
             for (int x = minX; x <= maxX; x++)
             {
-                buildTilemap.SetTile(new Vector3Int(x, minY, 0), tile);
-                buildTilemap.SetTile(new Vector3Int(x, maxY, 0), tile);
+                Vector3Int pos1 = new Vector3Int(x, minY, 0);
+                Vector3Int pos2 = new Vector3Int(x, maxY, 0);
+
+                buildTilemap.SetTile(pos1, tile);
+                GridManager.Instance.SetBlocked(pos1, tile != null);
+
+                buildTilemap.SetTile(pos2, tile);
+                GridManager.Instance.SetBlocked(pos2, tile != null);
             }
 
             for (int y = minY; y <= maxY; y++)
             {
-                buildTilemap.SetTile(new Vector3Int(minX, y, 0), tile);
-                buildTilemap.SetTile(new Vector3Int(maxX, y, 0), tile);
+                Vector3Int pos1 = new Vector3Int(minX, y, 0);
+                Vector3Int pos2 = new Vector3Int(maxX, y, 0);
+
+                buildTilemap.SetTile(pos1, tile);
+                GridManager.Instance.SetBlocked(pos1, tile != null);
+
+                buildTilemap.SetTile(pos2, tile);
+                GridManager.Instance.SetBlocked(pos2, tile != null);
             }
         }
         else if (currentMode == BuildMode.Destroy)
@@ -247,7 +259,9 @@ public class BuildManager : MonoBehaviour
             {
                 for (int y = minY; y <= maxY; y++)
                 {
-                    buildTilemap.SetTile(new Vector3Int(x, y, 0), null);
+                    Vector3Int pos = new Vector3Int(x, y, 0);
+                    buildTilemap.SetTile(pos, null);
+                    GridManager.Instance.SetBlocked(pos, false);
                 }
             }
         }
