@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WorkerStateWorking : WorkerState
 {
-    private float workDuration = 1.5f; // čas potrebný na dokončenie úlohy
+    private float workDuration = 1.5f;
     private float workTimer;
 
     public WorkerStateWorking(Worker worker) : base(worker) {}
@@ -14,7 +14,8 @@ public class WorkerStateWorking : WorkerState
 
     public override void Update()
     {
-        workTimer += Time.deltaTime;
+        float deltaTime = Time.deltaTime * TimeManager.Instance.timeMultiplier;
+        workTimer += deltaTime;
 
         if (workTimer >= workDuration)
         {
@@ -22,4 +23,3 @@ public class WorkerStateWorking : WorkerState
         }
     }
 }
-
