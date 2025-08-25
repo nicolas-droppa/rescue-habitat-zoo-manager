@@ -6,17 +6,18 @@ public class WorkerStateWalkTo : WorkerState
 
     public override void Enter()
     {
-        // Nothing special for now
+        // pri vstupe do walk sa zapne walking anim
+        worker.headAnimator.SetBool("IsWalking", true);
     }
 
     public override void Update()
     {
-        // Just move along the path each frame
         worker.MoveAlongPath();
     }
 
     public override void Exit()
     {
-        // Nothing to clean up
+        // pri výstupe vypneme walking
+        worker.headAnimator.SetBool("IsWalking", false);
     }
 }

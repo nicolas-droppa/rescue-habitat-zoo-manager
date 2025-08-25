@@ -12,6 +12,9 @@ public class Worker : MonoBehaviour
     public List<Vector3> path;
     private int pathIndex = 0;
 
+    [Header("References")]
+    public Animator headAnimator;
+
     void Start()
     {
         ChangeState(new WorkerStateIdle(this));
@@ -74,13 +77,40 @@ public class Worker : MonoBehaviour
     public void MoveAlongPath()
     {
         if (path == null || pathIndex >= path.Count)
+        {
+            StopWalking();
             return;
+        }
 
         float deltaTime = Time.deltaTime * TimeManager.Instance.timeMultiplier;
 
+        Vector3 oldPos = transform.position;
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * deltaTime);
 
-        // Slightly larger threshold to avoid stutter
+        // smer pohybu
+        Vector3 dir = (transform.position - oldPos).normalized;
+
+        if (dir.magnitude > 0.01f) // aby nesvietil random smer keď stojí
+        {
+            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+            {
+                // horizontálny pohyb
+                headAnimator.SetInteger("Direction", dir.x > 0 ? 3 : 2); // 3 = right, 2 = left
+            }
+            else
+            {
+                // vertikálny pohyb
+                headAnimator.SetInteger("Direction", dir.y > 0 ? 1 : 0); // 1 = up, 0 = down
+            }
+
+            headAnimator.SetBool("IsWalking", true);
+        }
+        else
+        {
+            StopWalking();
+        }
+
+        // threshold aby sa worker nezasekával
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.2f)
         {
             pathIndex++;
@@ -90,8 +120,15 @@ public class Worker : MonoBehaviour
             }
             else
             {
+                StopWalking();
                 OnArrivedAtJob();
             }
         }
+    }
+
+
+    public void StopWalking()
+    {
+        headAnimator.SetBool("IsWalking", false);
     }
 }

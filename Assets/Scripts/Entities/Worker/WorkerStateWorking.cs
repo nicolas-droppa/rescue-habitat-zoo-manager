@@ -10,12 +10,12 @@ public class WorkerStateWorking : WorkerState
     public override void Enter()
     {
         workTimer = 0f;
+        worker.StopWalking();
     }
 
     public override void Update()
     {
-        float deltaTime = Time.deltaTime * TimeManager.Instance.timeMultiplier;
-        workTimer += deltaTime;
+        workTimer += Time.deltaTime * TimeManager.Instance.timeMultiplier;
 
         if (workTimer >= workDuration)
         {

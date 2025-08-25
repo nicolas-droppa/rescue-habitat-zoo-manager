@@ -4,7 +4,7 @@ public class WorkerStateIdle : WorkerState
 
     public override void Enter()
     {
-        // Idle anim
+        worker.StopWalking();
     }
 
     public override void Update()
