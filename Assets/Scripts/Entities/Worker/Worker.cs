@@ -40,7 +40,7 @@ public class Worker : MonoBehaviour
         Vector3Int startCell = GridManager.Instance.WorldToCell(transform.position);
         Vector3Int endCell = job.targetPosition;
 
-        // Ensure target is walkable, otherwise find nearest walkable
+        // If not walkable... find nearest walkable
         if (!GridManager.Instance.IsWalkable(endCell))
         {
             endCell = GridManager.Instance.FindNearestWalkableCell(endCell);
@@ -87,19 +87,17 @@ public class Worker : MonoBehaviour
         Vector3 oldPos = transform.position;
         transform.position = Vector3.MoveTowards(transform.position, targetWorldPos, moveSpeed * deltaTime);
 
-        // smer pohybu
+        // movement dir
         Vector3 dir = (transform.position - oldPos).normalized;
 
         if (dir.magnitude > 0.01f) // aby nesvietil random smer keď stojí
         {
             if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
-            {
-                // horizontálny pohyb
+            { 
                 headAnimator.SetInteger("Direction", dir.x > 0 ? 3 : 2); // 3 = right, 2 = left
             }
             else
             {
-                // vertikálny pohyb
                 headAnimator.SetInteger("Direction", dir.y > 0 ? 1 : 0); // 1 = up, 0 = down
             }
 
@@ -110,7 +108,7 @@ public class Worker : MonoBehaviour
             StopWalking();
         }
 
-        // threshold aby sa worker nezasekával
+        // threshold so worker wont stop
         if (Vector3.Distance(transform.position, targetWorldPos) < 0.2f)
         {
             pathIndex++;
