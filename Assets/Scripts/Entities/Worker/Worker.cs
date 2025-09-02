@@ -90,7 +90,7 @@ public class Worker : MonoBehaviour
         // movement dir
         Vector3 dir = (transform.position - oldPos).normalized;
 
-        if (dir.magnitude > 0.01f) // aby nesvietil random smer keď stojí
+        if (dir.magnitude > 0.01f) // check for random dir...
         {
             if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
             { 
